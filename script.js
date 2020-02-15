@@ -1,6 +1,6 @@
 const numWide = 7;
 const numHigh = 6;
-let blue = true;
+let finished = false;
 
 // get id of the <td> element based on the column and row
 function boxId(col, row) {
@@ -35,6 +35,10 @@ function winner(set) {
     return same ? c : "none";    
 }
 
+function createEmptySet() {
+    return ["white", "white", "white", "white"];
+}
+
 // "blue" = blue win
 // "red" = red win
 // "tie" = tie
@@ -44,36 +48,37 @@ function state(board) {
     
     // check up and down sets
     for (let col=0; col<numWide; col++) {
-        set = [];
+        set = createEmptySet();
         for (let row=0; row<numHigh; row++) {
             set[row % 4] = board[col][row];
-            const winner = winner(set);
-            if (winner != "none") {
-                return winner;
+            const winningPlayer = winner(set);
+            //console.log(winningPlayer);
+            if (winningPlayer != "none") {
+                return winningPlayer;
             }
         }
     }
     
     // check left and right sets
     for (let row=0; row<numHigh; row++) {
-        set = [];
+        set = createEmptySet();
         for (let col=0; col<numWide; col++) {
             set[col % 4] = board[col][row];
-            const winner = winner(set);
-            if (winner != "none")
-                return winner;
+            const winningPlayer = winner(set);
+            if (winningPlayer != "none")
+                return winningPlayer;
         }
     }
     
     // check bottom left to top right sets
     for (let row=0; row<numHigh - 3; row++) {
         for (let col=0; col<numWide - 3; col++) {
-            set = [];
-            for (let i=0; i<4; i++) {
+            set = createEmptySet();
+            for (let i=0; i<set.length; i++) {
                 set[i] = board[col + i][row + i];
-                const winner = winner(set);
-                if (winner != "none")
-                    return winner;
+                const winningPlayer = winner(set);
+                if (winningPlayer != "none")
+                    return winningPlayer;
             }
         }
     }
@@ -81,12 +86,12 @@ function state(board) {
     // check top left to bottom right sets
     for (let row=3; row<numHigh; row++) {
         for (let col=0; col<numWide - 3; col++) {
-            set = [];
-            for (let i=0; i<4; i++) {
+            set = createEmptySet();
+            for (let i=0; i<set.length; i++) {
                 set[i] = board[col + i][row - i];
-                const winner = winner(set);
-                if (winner != "none")
-                    return winner;
+                const winningPlayer = winner(set);
+                if (winningPlayer != "none")
+                    return winningPlayer;
             }
         }
     }
@@ -105,18 +110,95 @@ function state(board) {
         return "incomplete";
 }
 
-// the function that occurs when the user clicks on a the column number 'col'
-function click(col) {
+function showState(state) {
+    const elem = document.getElementById("gameState");
+    finished = true;
+    switch (state) {
+        case "blue":
+            elem.textContent = "Blue Wins!"
+            elem.style.color = "blue";
+            break;
+        case "red":
+            elem.textContent = "Red Wins!"
+            elem.style.color = "red";
+            break;
+        case "tie":
+            elem.textContent = "It's a tie!"
+            elem.style.color = "pruple";
+            break;
+        default:
+            finished = false;
+    }
+
+    if (finished) {
+        for (let row=0; row<numHigh; row++) {
+            for (let col=0; col<numWide; col++) {
+                const dataElem = document.getElementById(boxId(col, row));
+                dataElem.onclick = function() { };
+            }
+        }
+    }
+}
+
+// check to see if a column is full
+function columnFull(board, col) {
+    return (board[col][numHigh-1] != "white");
+}
+
+// place a piece in column
+function place(board, col, blue) {
     for (let row=0; row<numHigh; row++) {
-        const elem = document.getElementById(boxId(col, row));
-        if (elem.style.background == "white") {
-            elem.style.background = blue ? "blue" : "red";
-            blue = !blue;
+        if (board[col][row] == "white") {
+            board[col][row] = blue ? "blue" : "red";
             break;
         }
     }
+}
 
-    // print if it is a winning state, tie, or incomplete game
-    const board = getBoard();
-    console.log(state(board));
+// remove piece from column
+function remove(board, col) {
+    for (let row=numHigh-1; row>=0; row--) {
+        if (board[col][row] != "white") {
+            board[col][row] = "white";
+            break;
+        }
+    }
+}
+
+// the function that occurs when the user clicks on a the column number 'col'
+function click(col) {
+    let board = getBoard();
+    let currentState;
+
+    if (!columnFull(board, col)) {
+
+        // place blue piece
+        for (let row=0; row<numHigh; row++) {
+            const elem = document.getElementById(boxId(col, row));
+            if (elem.style.background == "white") {
+                elem.style.background = "blue";
+                break;
+            }
+        }
+        board = getBoard();
+        currentState = state(board);
+        showState(currentState);
+        // console.log("blue turn: " + currentState);
+        
+        // place red piece
+        if (!finished) {
+            const redCol = minimaxHelper(board);
+            for (let row=0; row<numHigh; row++) {
+                const elem = document.getElementById(boxId(redCol, row));
+                if (elem.style.background == "white") {
+                    elem.style.background = "red";
+                    break;
+                }
+            }
+            board = getBoard();
+            currentState = state(board);
+            showState(currentState);
+            // console.log("red turn: " + currentState);
+        }
+    }
 }
