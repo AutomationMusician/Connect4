@@ -2,10 +2,12 @@ const numWide = 7;
 const numHigh = 6;
 let blue = true;
 
+// get id of the <td> element based on the column and row
 function boxId(col, row) {
     return "col" + col + "row" + row;
 }
 
+// create a 2d array based on the coloring of the html table 
 function getBoard() {
     const board = [];
     for (let col=0; col<numWide; col++) {
@@ -19,6 +21,8 @@ function getBoard() {
     return board;
 }
 
+// set is an array of boxes in a row
+// winner checks the set of boxes and determines if it is a winning combination
 // returns "none", "blue", or "red"
 function winner(set) {
     const c = set[0];
@@ -101,6 +105,7 @@ function state(board) {
         return "incomplete";
 }
 
+// the function that occurs when the user clicks on a the column number 'col'
 function click(col) {
     for (let row=0; row<numHigh; row++) {
         const elem = document.getElementById(boxId(col, row));
@@ -110,6 +115,8 @@ function click(col) {
             break;
         }
     }
+
+    // print if it is a winning state, tie, or incomplete game
     const board = getBoard();
     console.log(state(board));
 }

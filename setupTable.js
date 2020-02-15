@@ -1,3 +1,4 @@
+// Create the connect 4 table from scratch
 function setupTable() {
     const tbody = document.getElementById("tbody");
     const rows = [];
@@ -12,6 +13,8 @@ function setupTable() {
         }
         rows.push(rowElem);
     }
+    
+    // add rows to table in reverse order (so that the 0th row is on the bottom)
     while (rows.length > 0) {
         tbody.append(rows.pop());
     }
