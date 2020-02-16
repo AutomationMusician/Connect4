@@ -1,6 +1,7 @@
 const numWide = 7;
 const numHigh = 6;
 let finished = false;
+const moves = [];
 
 // get id of the <td> element based on the column and row
 function boxId(col, row) {
@@ -140,6 +141,23 @@ function showState(state) {
     }
 }
 
+function undo() {
+    if (moves.length > 1) {
+        for (let i=0; i<2; i++) {
+            const col = moves.pop();
+            for (let row=numHigh-1; row>=0; row--) {
+                const dataElem = document.getElementById(boxId(col, row));
+                if (dataElem.style.background != "white") {
+                    dataElem.style.background = "white";
+                    break;
+                }
+            }
+        }
+    }
+
+    document.getElementById("undo").disabled = (moves.length <= 1);
+}
+
 // check to see if a column is full
 function columnFull(board, col) {
     return (board[col][numHigh-1] != "white");
@@ -173,6 +191,7 @@ function clearBoard() {
         }
     }
     document.getElementById("playRed").disabled = false;
+    document.getElementById("undo").disabled = true;
 }
 
 // place blue piece
@@ -188,6 +207,7 @@ function placeBlue(board, col) {
     board = getBoard();
     const currentState = state(board);
     showState(currentState);
+    moves.push(col);
 }
 
 // place red piece
@@ -204,7 +224,9 @@ function placeRed() {
     board = getBoard();
     const currentState = state(board);
     showState(currentState);
+    moves.push(redCol);
     document.getElementById("playRed").disabled = true;
+    document.getElementById("undo").disabled = false;
 }
 
 // the function that occurs when the user clicks on a the column number 'col'

@@ -21,6 +21,8 @@ function setupTable() {
     while (rows.length > 0) {
         tbody.append(rows.pop());
     }
+
+    document.getElementById("undo").disabled = true;
 }
 
 setupTable();
