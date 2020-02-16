@@ -165,40 +165,56 @@ function remove(board, col) {
     }
 }
 
+function clearBoard() {
+    for (let row=0; row<numHigh; row++) {
+        for (let col=0; col<numWide; col++) {
+            const elem = document.getElementById(boxId(col, row));
+            elem.style.background = "white";
+        }
+    }
+    document.getElementById("playRed").disabled = false;
+}
+
+// place blue piece
+function placeBlue(board, col) {
+    // place blue piece
+    for (let row=0; row<numHigh; row++) {
+        const elem = document.getElementById(boxId(col, row));
+        if (elem.style.background == "white") {
+            elem.style.background = "blue";
+            break;
+        }
+    }
+    board = getBoard();
+    const currentState = state(board);
+    showState(currentState);
+}
+
+// place red piece
+function placeRed() {
+    let board = getBoard();
+    const redCol = minimaxHelper(board);
+    for (let row=0; row<numHigh; row++) {
+        const elem = document.getElementById(boxId(redCol, row));
+        if (elem.style.background == "white") {
+            elem.style.background = "red";
+            break;
+        }
+    }
+    board = getBoard();
+    const currentState = state(board);
+    showState(currentState);
+    document.getElementById("playRed").disabled = true;
+}
+
 // the function that occurs when the user clicks on a the column number 'col'
 function click(col) {
     let board = getBoard();
-    let currentState;
-
     if (!columnFull(board, col)) {
-
-        // place blue piece
-        for (let row=0; row<numHigh; row++) {
-            const elem = document.getElementById(boxId(col, row));
-            if (elem.style.background == "white") {
-                elem.style.background = "blue";
-                break;
-            }
-        }
-        board = getBoard();
-        currentState = state(board);
-        showState(currentState);
-        // console.log("blue turn: " + currentState);
-        
-        // place red piece
-        if (!finished) {
-            const redCol = minimaxHelper(board);
-            for (let row=0; row<numHigh; row++) {
-                const elem = document.getElementById(boxId(redCol, row));
-                if (elem.style.background == "white") {
-                    elem.style.background = "red";
-                    break;
-                }
-            }
-            board = getBoard();
-            currentState = state(board);
-            showState(currentState);
-            // console.log("red turn: " + currentState);
-        }
+        placeBlue(board, col);
+        if (!finished)
+            placeRed();
     }
 }
+
+

@@ -1,5 +1,8 @@
 // Create the connect 4 table from scratch
 function setupTable() {
+    const toolbarElem = document.getElementById("toolbar");
+    toolbarElem.colSpan = numWide;
+
     const tbody = document.getElementById("tbody");
     const rows = [];
     for (let row=0; row<numHigh; row++) {
