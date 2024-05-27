@@ -1,23 +1,18 @@
 const maxDepth = 8;
 
-function minimaxHelper(board) {
-    let value = Number.POSITIVE_INFINITY;
-    let minimizedColumn = -1;
-    const randArray = randomArray(numWide);
-    for (let i=0; i<numWide; i++) {
-        const col = randArray[i];
-        if (!columnFull(board, col)) {
-            place(board, col, false);
-            const currentValue = minimax(board, 0, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, true);
-            if (currentValue < value) {
-                value = currentValue;
-                minimizedColumn = col;
-            }
-            remove(board, col);
-        }
+function randomArray(size) {
+    let array = [];
+    for (let i=0; i<size; i++)
+        array.push(i);
+    
+    for (let i=size -1; i>0; i--) {
+        const swapIndex = Math.floor((i + 1)*Math.random());
+        const temp = array[i];
+        array[i] = array[swapIndex];
+        array[swapIndex] = temp;
     }
-    console.log(value);
-    return minimizedColumn;
+
+    return array;
 }
 
 function minimax(board, depth, alpha, beta, blue) {
@@ -74,48 +69,54 @@ function minimax(board, depth, alpha, beta, blue) {
     }
 }
 
-function randomArray(size) {
-    let array = [];
-    for (let i=0; i<size; i++)
-        array.push(i);
-    
-    for (let i=size -1; i>0; i--) {
-        const swapIndex = Math.floor((i + 1)*Math.random());
-        const temp = array[i];
-        array[i] = array[swapIndex];
-        array[swapIndex] = temp;
-    }
-
-    return array;
-}
-
-/*
-function sleep(milliseconds) {
-    const date = Date.now();
-    let currentDate = null;
-    do {
-      currentDate = Date.now();
-    } while (currentDate - date < milliseconds);
-}
-
-function drawing(board) {
-    for (let row=numHigh-1; row>=0; row--) {
-        let string = "";
-        for (let col=0; col<numWide; col++) {
-            let char = '_';
-            switch (board[col][row]) {
-                case "blue": 
-                    char = 'B';
-                    break;
-                case "red":
-                    char = 'r';
-                    break;
+function minimaxBlue(board) {
+    let value = Number.NEGATIVE_INFINITY;
+    let maximizedColumn = -1;
+    const randArray = randomArray(numWide);
+    for (let i=0; i<numWide; i++) {
+        const col = randArray[i];
+        if (!columnFull(board, col)) {
+            place(board, col, true);
+            const currentValue = minimax(board, 0, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, false);
+            if (currentValue > value) {
+                value = currentValue;
+                maximizedColumn = col;
             }
-            string += char + ' ';
+            remove(board, col);
         }
-        console.log(string);
     }
-    console.log();
-    sleep(1000);
+    console.log(value);
+    return maximizedColumn;
 }
-*/
+
+function minimaxRed(board) {
+    let value = Number.POSITIVE_INFINITY;
+    let minimizedColumn = -1;
+    const randArray = randomArray(numWide);
+    for (let i=0; i<numWide; i++) {
+        const col = randArray[i];
+        if (!columnFull(board, col)) {
+            place(board, col, false);
+            const currentValue = minimax(board, 0, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, true);
+            if (currentValue < value) {
+                value = currentValue;
+                minimizedColumn = col;
+            }
+            remove(board, col);
+        }
+    }
+    console.log(value);
+    return minimizedColumn;
+}
+
+function asyncMinimaxBlue(board) { 
+    return new Promise((resolve, reject) => {
+        resolve(minimaxBlue(board));
+    });
+}
+
+function asyncMinimaxRed(board) {  
+    return new Promise((resolve, reject) => {
+        resolve(minimaxRed(board));
+    });
+}

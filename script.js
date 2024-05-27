@@ -1,7 +1,8 @@
 const numWide = 7;
 const numHigh = 6;
 let finished = false;
-const moves = [];
+let twoAI = false;
+let moves = [];
 
 // get id of the <td> element based on the column and row
 function boxId(col, row) {
@@ -130,17 +131,22 @@ function showState(state) {
         default:
             finished = false;
     }
+}
 
-    if (finished) {
-        for (let row=0; row<numHigh; row++) {
-            for (let col=0; col<numWide; col++) {
-                const dataElem = document.getElementById(boxId(col, row));
-                dataElem.onclick = function() { };
-            }
+// Change AI mode
+function changeAI() {
+    twoAI = !twoAI;
+    document.getElementById("changeAI").textContent = twoAI ? "Play Against AI" : "AI vs. AI";
+
+    if (twoAI) {
+        while (!finished) {
+            if (!finished) placeBlueAI();
+            if (!finished) placeRed();
         }
     }
 }
 
+// undo two moves
 function undo() {
     if (moves.length > 1) {
         for (let i=0; i<2; i++) {
@@ -156,6 +162,10 @@ function undo() {
     }
 
     document.getElementById("undo").disabled = (moves.length <= 1);
+    document.getElementById("playRed").disabled = (moves.length > 0);
+    document.getElementById("gameState").textContent = "";
+    finished = false;
+    //console.log(moves);
 }
 
 // check to see if a column is full
@@ -183,6 +193,7 @@ function remove(board, col) {
     }
 }
 
+// clear board
 function clearBoard() {
     for (let row=0; row<numHigh; row++) {
         for (let col=0; col<numWide; col++) {
@@ -192,11 +203,14 @@ function clearBoard() {
     }
     document.getElementById("playRed").disabled = false;
     document.getElementById("undo").disabled = true;
+    document.getElementById("gameState").textContent = "";
+    finished = false;
+    moves = [];
+    //console.log(moves);
 }
 
 // place blue piece
 function placeBlue(board, col) {
-    // place blue piece
     for (let row=0; row<numHigh; row++) {
         const elem = document.getElementById(boxId(col, row));
         if (elem.style.background == "white") {
@@ -210,32 +224,54 @@ function placeBlue(board, col) {
     moves.push(col);
 }
 
-// place red piece
-function placeRed() {
+// place blue piece
+function placeBlueAI() {
     let board = getBoard();
-    const redCol = minimaxHelper(board);
+    const blueCol = minimaxBlue(board);
     for (let row=0; row<numHigh; row++) {
-        const elem = document.getElementById(boxId(redCol, row));
+        const elem = document.getElementById(boxId(blueCol, row));
         if (elem.style.background == "white") {
-            elem.style.background = "red";
+            elem.style.background = "blue";
             break;
         }
     }
     board = getBoard();
     const currentState = state(board);
     showState(currentState);
-    moves.push(redCol);
+    moves.push(blueCol);
     document.getElementById("playRed").disabled = true;
     document.getElementById("undo").disabled = false;
+}
+
+// place red piece
+function placeRed() {
+    let board = getBoard();
+    console.log("red about to move");
+    asyncMinimaxRed(board).then((col) => {
+        console.log("red has moved ");
+        for (let row=0; row<numHigh; row++) {
+            const elem = document.getElementById(boxId(col, row));
+            if (elem.style.background == "white") {
+                elem.style.background = "red";
+                break;
+            }
+        }
+        const board = getBoard();
+        const currentState = state(board);
+        showState(currentState);
+        moves.push(col);
+        document.getElementById("playRed").disabled = true;
+        document.getElementById("undo").disabled = false;
+    });
 }
 
 // the function that occurs when the user clicks on a the column number 'col'
 function click(col) {
     let board = getBoard();
     if (!columnFull(board, col)) {
-        placeBlue(board, col);
-        if (!finished)
-            placeRed();
+        if (!finished) placeBlue(board, col);
+        if (!finished) placeRed();
+        //console.log(moves);
     }
 }
 
